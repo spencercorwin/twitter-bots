@@ -1,0 +1,40 @@
+{
+  "name": "twitter-bots",
+  "version": "1.0.0",
+  "description": "NodeJS Twitter bots",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "engines": {
+    "node": "8.11.3"
+  },
+  "keywords": [
+    "twitter",
+    "bots",
+    "nodejs",
+    "bitcoin",
+    "crypto",
+    "cryptocurrency",
+    "gold",
+    "silver",
+    "prices",
+    "daily",
+    "LIBOR",
+    "interest",
+    "rates"
+  ],
+  "author": "Spencer Corwin",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "cheerio": "^1.0.0-rc.2",
+    "dotenv": "^6.2.0",
+    "mongodb": "^3.1.13",
+    "node-cron": "^2.0.3",
+    "puppeteer": "^1.11.0",
+    "request-promise": "^4.2.2",
+    "twitter": "^1.7.1"
+  }
+}
