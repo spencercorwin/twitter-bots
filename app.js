@@ -1,7 +1,7 @@
 const { tweetFunction, followFollowers } = require('./daily-gold-quotes');
 const { checkAndStore } = require('./popularity-tracker');
 
-process.on('exit', function(code) {  
+process.on('exit', function(code) {
     console.log(`About to exit with code ${code}`);
 });
 
