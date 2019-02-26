@@ -66,7 +66,9 @@ exports.tweetFunction = async (chartValue) => {
     try {
         const browser = await puppeteer.launch({args: ['--no-sandbox']});
         const page = await browser.newPage();
-        await page.goto(url);
+        await page.goto(url, {
+            timeout: 240000 //4 min to timeout
+        });
         await page.select('select#gpxSmallChartTopLeft_time', chartValue);
         await page.select('select#gpxSmallChartTopRight_time', chartValue);
         const html = await page.content();
