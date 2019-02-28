@@ -99,11 +99,7 @@ exports.checkAndStore = () => {
                                 } else if (!candidate) {
                                     console.log('Candidate not found: ' + candidate);
                                 } else {
-                                    try {
-                                        console.log(`Found and updated candidate count for: ${JSON.stringify(candidate.value.handle)}. Now has ${JSON.stringify(candidate.value.data[0].followerCount)} followers`);
-                                    } catch {
-                                        console.log('Error with this person');
-                                    }
+                                    console.log(`Found and updated candidate count for: ${JSON.stringify(candidate.value.handle)}. Now has ${JSON.stringify(candidate.value.data[0].followerCount)} followers`);
                                 }
                             })
                     }
