@@ -1,12 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const filename = path.join(__dirname, '.gitignore');
+const filename = path.join(__dirname, '.env');
 fs.readFile(filename, 'utf8', (err, data) => {
-  if (err) {
-    throw err;
+  if (!err) {
+    throw ".env file found";
   };
-  if (!/.env/.test(data)) {
-    throw ".gitignore should include .env before committing";
-  }
 })
