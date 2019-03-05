@@ -66,9 +66,8 @@ exports.tweetFunction = async (chartValue) => {
     try {
         const browser = await puppeteer.launch({args: ['--no-sandbox']});
         const page = await browser.newPage();
-        await page.goto(url, {
-            timeout: 240000 //4 min timeout
-        });
+        const fourMinInMS = 4*60*100;
+        await page.goto(url, {timeout: fourMinInMS});
         await page.select('select#gpxSmallChartTopLeft_time', chartValue);
         await page.select('select#gpxSmallChartTopRight_time', chartValue);
         const html = await page.content();
@@ -135,28 +134,19 @@ exports.tweetFunction = async (chartValue) => {
             })
         })
     } catch(error) {
-        console.log('Error: ' + error);
+        console.log('Error in tweet function: ' + error);
     }
 };
 
 //Function to check current followers then follow all that are returned. Gotta encourage more!
-exports.followFollowers = () => {
-    dailygoldquotes.get('followers/list', {screen_name: 'dailygoldquotes'}, (err, tweet, res) => {
-        if (!err) {
-            for (let index in tweet.users) {
-                let idToFollow = tweet.users[index].id_str;
-                let nameToFollow = tweet.users[index].screen_name;
-                dailygoldquotes.post('friendships/create', {user_id: idToFollow}, (err, tweet, res) => {
-                    if (!err) {
-                        console.log('Followed: ' + nameToFollow);
-                    } else {
-                        console.log('Error in following name: ' + nameToFollow);
-                        console.log('Error: ' + err);
-                    }
-                })
-            }
-        } else {
-            console.log('Error retreiving followers of @dailygoldquotes')
-        }
-    });
+exports.followFollowers = async () => {
+  try {
+    const tweet = await dailygoldquotes.get('followers/list', {screen_name: 'dailygoldquotes'});
+    for (let index in tweet.users) {
+      let idToFollow = tweet.users[index].id_str;
+      await dailygoldquotes.post('friendships/create', {user_id: idToFollow});
+    }
+  } catch (err) {
+    console.log('Error following followers of @dailygoldquotes: ' + err);
+  }
 };

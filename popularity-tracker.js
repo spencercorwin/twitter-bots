@@ -1,4 +1,4 @@
-const MongoClient = require('mongodb').MongoClient;
+const { MongoClient } = require('mongodb');
 const Twitter = require('twitter');
 require('dotenv').config();
 
@@ -21,7 +21,6 @@ const handlesToCheck = [
     'SenWarren',
     'ewarren',
     'RepJohnDelaney',
-    'JohnKDelaney',
     'TulsiGabbard',
     'TulsiPress',
     'KamalaHarris',
@@ -41,7 +40,6 @@ const handlesToCheck = [
     'JoeBiden',
     'staceyabrams',
     'DrJillStein',
-    'HBWorldview',
     'MichaelEArth',
     'amyklobuchar',
     'SenAmyKlobuchar',
@@ -76,35 +74,24 @@ const lookupString = ((handlesToCheck) => {
     return result;
 })(handlesToCheck);
 
-exports.checkAndStore = () => {
-    MongoClient.connect(process.env.DB, (err, client) => {
-        if (err) {
-            console.log('Database error: ' + err);
-        } else {
-            console.log('Successful database connection');
-            const db = client.db();
-            politicianTwitter.get('users/lookup', {screen_name: lookupString}, (err, tweet, response) => {
-                if (err) {
-                    console.log('Error: ' + err);
-                } else {
-                    //Loop and database logic here
-                    for (let i = 0; i < tweet.length; i++) {
-                        db.collection('candidates').findOneAndUpdate(
-                            {handle: tweet[i].screen_name},
-                            {$push: {data: {followerCount: tweet[i].followers_count, date: new Date()}}}, //Check here
-                            {upsert: true, returnNewDocument: true},
-                            (err, candidate) => {
-                                if (err) {
-                                    console.log('Error in finding handle: ' + err);
-                                } else if (!candidate) {
-                                    console.log('Candidate not found: ' + candidate);
-                                } else {
-                                    console.log(`Found and updated candidate count for: ${JSON.stringify(candidate.value.handle)}. Now has ${JSON.stringify(candidate.value.data[0].followerCount)} followers`);
-                                }
-                            })
-                    }
-                }
-            });
-        }
-    })
+exports.checkAndStore = async () => {
+  try {
+    const client = await MongoClient.connect(process.env.DB);
+    const db = client.db();
+    const tweet = await politicianTwitter.get('users/lookup', {screen_name: lookupString});
+    //Loop and database logic here
+    for (let i = 0; i < tweet.length; i++) {
+      const candidate = await db.collection('candidates').findOneAndUpdate(
+          {handle: tweet[i].screen_name},
+          {$push: {data: {followerCount: tweet[i].followers_count, date: new Date()}}},
+          {upsert: true, returnNewDocument: true});
+      if (!candidate) {
+        console.log('Candidate not found: ' + candidate);
+      } else {
+        console.log(`Found and updated follower count for: ${JSON.stringify(candidate.value.handle)}. Now has ${JSON.stringify(candidate.value.data[0].followerCount)} followers`);
+      }
+    }
+  } catch (err) {
+    console.log('Error with checkAndStore: ' + err);
+  }
 }
