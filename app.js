@@ -7,6 +7,9 @@ process.on('exit', function(code) {
 
 const todaysDate = new Date();
 
+//Check and store Twitter follower counts everyday
+checkAndStore();
+
 //Check if the day is Mon-Fri
 //Script for daily Tweets. Every Mon-Thurs at 9am
 //Potential options: 60_day
@@ -20,7 +23,6 @@ if ([1,2,3,4,5].indexOf(todaysDate.getDay()) !== -1) {
 if (todaysDate.getDay() === 6) {
     tweetFunction('1_year');
     followFollowers();
-    checkAndStore();
     console.log(`Tweeting at ${todaysDate.toString()}`);
 }
 
