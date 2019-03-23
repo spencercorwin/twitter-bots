@@ -30,7 +30,7 @@ const handlesToCheck = [
     'petebuttigieg',
     'SenGillibrand',
     'gillibrandny',
-    'AndrewYangVFA',
+    'AndrewYang',
     'SenSanders',
     'BernieSanders',
     'betoorourke',
@@ -62,7 +62,8 @@ const handlesToCheck = [
     'RashidaTlaib',
     'GovGaryJohnson',
     'GovBillWeld',
-    'elonmusk'
+    'elonmusk',
+    'Hickenlooper',
 ];
 
 const lookupString = ((handlesToCheck) => {
