@@ -64,6 +64,7 @@ const handlesToCheck = [
     'GovBillWeld',
     'elonmusk',
     'Hickenlooper',
+    'MikeGravel',
 ];
 
 const lookupString = ((handlesToCheck) => {
