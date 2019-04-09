@@ -65,6 +65,12 @@ const handlesToCheck = [
     'elonmusk',
     'Hickenlooper',
     'MikeGravel',
+    'ericswalwell',
+    'RepSwalwell',
+    'GovInslee',
+    'JayInslee',
+    'TimRyan',
+    'RepTimRyan',
 ];
 
 const lookupString = ((handlesToCheck) => {
