@@ -100,6 +100,6 @@ exports.checkAndStore = async () => {
       }
     }
   } catch (err) {
-    console.log('Error with checkAndStore: ' + err);
+    console.log('Error with checkAndStore: ' + JSON.stringify(err));
   }
 }
