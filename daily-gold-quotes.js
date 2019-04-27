@@ -134,7 +134,7 @@ exports.tweetFunction = async (chartValue) => {
             })
         })
     } catch(error) {
-        console.log('Error in tweet function: ' + error);
+        console.log('Error in tweet function: ' + JSON.stringify(error));
     }
 };
 
@@ -147,6 +147,6 @@ exports.followFollowers = async () => {
       await dailygoldquotes.post('friendships/create', {user_id: idToFollow});
     }
   } catch (err) {
-    console.log('Error following followers of @dailygoldquotes: ' + err);
+    console.log('Error following followers of @dailygoldquotes: ' + JSON.stringify(err));
   }
 };
