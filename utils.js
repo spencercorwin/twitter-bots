@@ -64,6 +64,9 @@ const handlesToCheck = [
   'JayInslee',
   'TimRyan',
   'RepTimRyan',
+  'SenatorBennet',
+  'MichaelBennet',
+  'JohnDelaney',
 ];
 
 const idsToCheck = [
@@ -125,7 +128,10 @@ const idsToCheck = [
   "95713333",
   "734783792502575105",
   "44196397",
-  "14709326"
+  "14709326",
+  "45645232",
+  "426028646",
+  "224285242",
 ];
 
 exports.handleLookupString = ((handlesToCheck) => {
