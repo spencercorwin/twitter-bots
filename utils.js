@@ -1,3 +1,5 @@
+const { MongoClient } = require('mongodb');
+
 exports.copyToClipboard = data => {
   const proc = require('child_process').spawn('pbcopy');
   proc.stdin.write(data);
@@ -151,3 +153,33 @@ for (let i = 0; i < idsToCheck.length - 1; i++) {
 result += idsToCheck[idsToCheck.length - 1];
 return result;
 })(idsToCheck);
+
+exports.transferToAtlas = async (oldDB, newDB) => {
+  try {
+    const oldClient = await MongoClient.connect(oldDB);
+    const oldDBInstance = oldClient.db().collection('candidates');
+    const oldCursor = await oldDBInstance.find({}); // Gets all records
+    const oldData = await oldCursor.toArray();
+
+    const newClient = await MongoClient.connect(newDB, { useNewUrlParser: true });
+    const newCollection = newClient.db('popularity-contest').collection('handles');
+
+    oldData.forEach((document, index) => {
+      newCollection.findOneAndUpdate(
+        {id_str: document.id_str},
+        {
+          $set: {
+            data: document.data,
+          }
+        }
+      );
+      console.log(index, oldData.length);
+      if (index === oldData.length - 1) {
+        console.log('Done updating');
+      }
+    });
+
+  } catch (err) {
+    console.log(err);
+  }
+}

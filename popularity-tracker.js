@@ -16,7 +16,7 @@ exports.checkAndStore = async () => {
   try {
     const client = await MongoClient.connect(process.env.DB);
     const db = client.db();
-    const atlasClient = await MongoClient.connect(process.env.atlas);
+    const atlasClient = await MongoClient.connect(process.env.atlas, { useNewUrlParser: true });
     const atlasDb = atlasClient.db('popularity-contest');
     const tweet = await politicianTwitter.get('users/lookup', {user_id: idLookupString});
     for (let i = 0; i < tweet.length; i++) {
@@ -27,7 +27,6 @@ exports.checkAndStore = async () => {
             $set: {
               handle: tweet[i].screen_name,
               location: tweet[i].location,
-              id_str: tweet[i].id_str,
               description: tweet[i].description,
               url: tweet[i].url,
               name: tweet[i].name,
@@ -52,7 +51,6 @@ exports.checkAndStore = async () => {
             $set: {
               handle: tweet[i].screen_name,
               location: tweet[i].location,
-              id_str: tweet[i].id_str,
               description: tweet[i].description,
               url: tweet[i].url,
               name: tweet[i].name,

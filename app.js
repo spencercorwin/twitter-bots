@@ -35,4 +35,4 @@ setTimeout(() => {
       console.log(`Tweeting at ${todaysDate.toString()}`);
     }
   }
-}, 15000);
+}, 60000);
