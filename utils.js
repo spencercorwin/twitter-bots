@@ -1,76 +1,71 @@
-const { MongoClient } = require('mongodb');
+const { MongoClient } = require("mongodb");
 
 exports.copyToClipboard = data => {
-  const proc = require('child_process').spawn('pbcopy');
+  const proc = require("child_process").spawn("pbcopy");
   proc.stdin.write(data);
   proc.stdin.end();
 };
 
 const handlesToCheck = [
-  'CoryBooker',
-  'SenBooker',
-  'AOC',
-  'RepAOC',
-  'realDonaldTrump',
-  'HowardSchultz',
-  'SenWarren',
-  'ewarren',
-  'RepJohnDelaney',
-  'TulsiGabbard',
-  'TulsiPress',
-  'KamalaHarris',
-  'SenKamalaHarris',
-  'JulianCastro',
-  'SecretaryCastro',
-  'petebuttigieg',
-  'SenGillibrand',
-  'gillibrandny',
-  'AndrewYang',
-  'SenSanders',
-  'BernieSanders',
-  'betoorourke',
-  'RepBetoORourke',
-  'MikeBloomberg',
-  'BilldeBlasio',
-  'JoeBiden',
-  'staceyabrams',
-  'DrJillStein',
-  'MichaelEArth',
-  'amyklobuchar',
-  'SenAmyKlobuchar',
-  'TerryMcAuliffe',
-  'andrewgillum',
-  'FreeHugsProject',
-  'ElectRobbyWells',
-  'marwilliamson',
-  'VoteOjeda2020',
-  'officialmcafee',
-  'verminsupreme',
-  'arvinvohra',
-  'justinamash',
-  'randpaul',
-  'RepThomasMassie',
-  'adamkokesh',
-  'GavinNewsom',
-  'Ilhan',
-  'IlhanMN',
-  'RashidaTlaib',
-  'GovGaryJohnson',
-  'GovBillWeld',
-  'elonmusk',
-  'Hickenlooper',
-  'MikeGravel',
-  'ericswalwell',
-  'RepSwalwell',
-  'GovInslee',
-  'JayInslee',
-  'TimRyan',
-  'RepTimRyan',
-  'SenatorBennet',
-  'MichaelBennet',
-  'JohnDelaney',
-  'GovernorBullock',
-  'TomSteyer',
+  "CoryBooker",
+  "SenBooker",
+  "AOC",
+  "RepAOC",
+  "realDonaldTrump",
+  "HowardSchultz",
+  "SenWarren",
+  "ewarren",
+  "RepJohnDelaney",
+  "TulsiGabbard",
+  "TulsiPress",
+  "KamalaHarris",
+  "SenKamalaHarris",
+  "JulianCastro",
+  "SecretaryCastro",
+  "petebuttigieg",
+  "SenGillibrand",
+  "gillibrandny",
+  "AndrewYang",
+  "SenSanders",
+  "BernieSanders",
+  "betoorourke",
+  "RepBetoORourke",
+  "MikeBloomberg",
+  "BilldeBlasio",
+  "JoeBiden",
+  "staceyabrams",
+  "DrJillStein",
+  "amyklobuchar",
+  "SenAmyKlobuchar",
+  "TerryMcAuliffe",
+  "andrewgillum",
+  "marwilliamson",
+  "officialmcafee",
+  "verminsupreme",
+  "arvinvohra",
+  "justinamash",
+  "randpaul",
+  "RepThomasMassie",
+  "GavinNewsom",
+  "Ilhan",
+  "IlhanMN",
+  "RashidaTlaib",
+  "GovGaryJohnson",
+  "GovBillWeld",
+  "elonmusk",
+  "Hickenlooper",
+  "MikeGravel",
+  "ericswalwell",
+  "RepSwalwell",
+  "GovInslee",
+  "JayInslee",
+  "TimRyan",
+  "RepTimRyan",
+  "SenatorBennet",
+  "MichaelBennet",
+  "JohnDelaney",
+  "GovernorBullock",
+  "TomSteyer"
 ];
 
 const idsToCheck = [
@@ -102,7 +97,6 @@ const idsToCheck = [
   "216776631",
   "216881337",
   "975200486",
-  "16916445",
   "342863309",
   "1134292500",
   "16581604",
@@ -110,15 +104,11 @@ const idsToCheck = [
   "939091",
   "216065430",
   "111216929",
-  "17839631",
   "33537967",
   "22044727",
   "19471123",
   "465046121",
-  "715413574953279488",
-  "407230590",
   "21522338",
-  "2290583342",
   "961445378",
   "394746333",
   "101348737",
@@ -137,53 +127,56 @@ const idsToCheck = [
   "426028646",
   "224285242",
   "111721601",
-  "949934436",
+  "949934436"
 ];
 
-exports.handleLookupString = ((handlesToCheck) => {
-  let result = '';
+exports.handleLookupString = (handlesToCheck => {
+  let result = "";
   for (let i = 0; i < handlesToCheck.length - 1; i++) {
-      result += handlesToCheck[i] + ',';
+    result += handlesToCheck[i] + ",";
   }
   result += handlesToCheck[handlesToCheck.length - 1];
   return result;
 })(handlesToCheck);
 
-exports.idLookupString = ((idsToCheck) => {
-let result = '';
-for (let i = 0; i < idsToCheck.length - 1; i++) {
-    result += idsToCheck[i] + ',';
-}
-result += idsToCheck[idsToCheck.length - 1];
-return result;
+exports.idLookupString = (idsToCheck => {
+  let result = "";
+  for (let i = 0; i < idsToCheck.length - 1; i++) {
+    result += idsToCheck[i] + ",";
+  }
+  result += idsToCheck[idsToCheck.length - 1];
+  return result;
 })(idsToCheck);
 
 exports.transferToAtlas = async (oldDB, newDB) => {
   try {
     const oldClient = await MongoClient.connect(oldDB);
-    const oldDBInstance = oldClient.db().collection('candidates');
+    const oldDBInstance = oldClient.db().collection("candidates");
     const oldCursor = await oldDBInstance.find({}); // Gets all records
     const oldData = await oldCursor.toArray();
 
-    const newClient = await MongoClient.connect(newDB, { useNewUrlParser: true });
-    const newCollection = newClient.db('popularity-contest').collection('handles');
+    const newClient = await MongoClient.connect(newDB, {
+      useNewUrlParser: true
+    });
+    const newCollection = newClient
+      .db("popularity-contest")
+      .collection("handles");
 
     oldData.forEach((document, index) => {
       newCollection.findOneAndUpdate(
-        {id_str: document.id_str},
+        { id_str: document.id_str },
         {
           $set: {
-            data: document.data,
+            data: document.data
           }
         }
       );
       console.log(index, oldData.length);
       if (index === oldData.length - 1) {
-        console.log('Done updating');
+        console.log("Done updating");
       }
     });
-
   } catch (err) {
     console.log(err);
   }
-}
+};

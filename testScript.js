@@ -1,9 +1,9 @@
-const { getIdFromHandle, checkAndStore } = require('./popularity-tracker');
-const { transferToAtlas } = require('./utils');
-require('dotenv').config();
+const { getIdFromHandle, checkAndStore } = require("./popularity-tracker");
+const { transferToAtlas } = require("./utils");
+require("dotenv").config();
 
 //checkAndStore();
 
-//getIdFromHandle('SenatorBennet');
+// getIdFromHandle("VoteOjeda2020");
 
 //transferToAtlas(process.env.DB, process.env.atlas);
