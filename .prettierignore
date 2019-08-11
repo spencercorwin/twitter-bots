@@ -1,0 +1,10 @@
+package.json
+**/package.json
+/package.json
+./package.json
+.editorconfig
+yarn.lock
+*/yarn.lock
+**/*/Dockerfile
+**/*/*.sh
+**/*/*.env
