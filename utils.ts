@@ -9,10 +9,10 @@ require('dotenv').config();
 const { goldConsumerKey, goldConsumerSecret, goldAccessTokenKey, goldAccessTokenSecret } = process.env;
 
 const twitConfig = {
-  goldConsumerKey,
-  goldConsumerSecret,
-  goldAccessTokenKey,
-  goldAccessTokenSecret,
+  consumer_key: goldConsumerKey,
+  consumer_secret: goldConsumerSecret,
+  access_token_key: goldAccessTokenKey,
+  access_token_secret: goldAccessTokenSecret,
 };
 
 const dailygoldquotes = new Twitter(twitConfig as any);
