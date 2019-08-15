@@ -2,7 +2,7 @@ import Twitter from 'twitter';
 import cheerio from 'cheerio';
 import puppeteer from 'puppeteer';
 import fs from 'fs';
-import request from 'request';
+const request = require('request').defaults({ encoding: null });
 
 require('dotenv').config();
 
@@ -67,7 +67,9 @@ const todaysDateString = (() => {
 //URL for puppeteer to find gold charts
 const url = 'https://goldprice.org/';
 
-export const tweetFunction = async (chartValue: string): Promise<void> => {
+type ChartType = '20_year' | '60_day' | '6_month';
+
+export const tweetFunction = async (chartValue: ChartType): Promise<void> => {
   try {
     const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
     const page = await browser.newPage();
@@ -84,62 +86,72 @@ export const tweetFunction = async (chartValue: string): Promise<void> => {
     const silverPrice = $('#gpxtickerMiddle_price').text();
     const silverChartSrc = $('#gpxSmallChartTopRight_img').attr('src');
     //Download the photos from goldprice.org then write to local directory
-    request.get(goldChartSrc, (err, res, body) => {
+    request.get(goldChartSrc, (_err: any, _res: any, body: any) => {
       fs.writeFile(`${todaysDate}goldchart.png`, body, (err) => {
-        if (err) throw err;
+        if (err) {
+          throw err;
+        }
         console.log('The file was saved');
         const goldChartBuffer = fs.readFileSync(`./${todaysDate}goldchart.png`);
         //Upload chart png file
         dailygoldquotes.post('media/upload', { media: goldChartBuffer }, (err, media, _res) => {
-          if (!err) {
-            const status = {
-              status: `Gold price on ${todaysDateString}: $${goldPrice} USD #gold`,
-              media_ids: media.media_id_string,
-            };
-            dailygoldquotes.post('statuses/update', status, (err, _tweet, _res) => {
-              if (!err) {
-                console.log('Gold Success!');
-              }
-            });
+          if (err) {
+            throw err;
           }
+          const status = {
+            status: `Gold price on ${todaysDateString}: $${goldPrice} USD #gold`,
+            media_ids: media.media_id_string,
+          };
+          dailygoldquotes.post('statuses/update', status, (err, _tweet, _res) => {
+            if (err) {
+              throw err;
+            }
+            console.log('Gold Success!');
+          });
         });
       });
-      request.get(silverChartSrc, (err, res, body) => {
+      request.get(silverChartSrc, (_err: any, _res: any, body: any) => {
         fs.writeFile(`${todaysDate}silverchart.png`, body, (err) => {
-          if (err) throw err;
+          if (err) {
+            throw err;
+          }
           console.log('The file was saved');
           const goldChartBuffer = fs.readFileSync(`./${todaysDate}silverchart.png`);
           //Upload chart png file
           dailygoldquotes.post('media/upload', { media: goldChartBuffer }, (err, media, _res) => {
-            if (!err) {
-              const status = {
-                status: `Silver price on ${todaysDateString}: $${silverPrice} USD #silver`,
-                media_ids: media.media_id_string,
-              };
-              dailygoldquotes.post('statuses/update', status, (err, _tweet, _res) => {
-                if (!err) {
-                  console.log('Silver Success!');
-                  fs.unlink(`./${todaysDate}goldchart.png`, (err) => {
-                    if (!err) {
-                      console.log('Deleted silver chart');
-                      fs.unlink(`./${todaysDate}silverchart.png`, (err) => {
-                        if (!err) {
-                          console.log('Deleted gold chart');
-                          //Exit the NodeJS process
-                          process.exit(22);
-                        }
-                      });
-                    }
-                  });
-                }
-              });
+            if (err) {
+              throw err;
             }
+            const status = {
+              status: `Silver price on ${todaysDateString}: $${silverPrice} USD #silver`,
+              media_ids: media.media_id_string,
+            };
+            dailygoldquotes.post('statuses/update', status, (err, _tweet, _res) => {
+              if (err) {
+                throw err;
+              }
+              console.log('Silver Success!');
+              fs.unlink(`./${todaysDate}goldchart.png`, (err) => {
+                if (err) {
+                  throw err;
+                }
+                console.log('Deleted silver chart');
+                fs.unlink(`./${todaysDate}silverchart.png`, (err) => {
+                  if (err) {
+                    throw err;
+                  }
+                  console.log('Deleted gold chart');
+                  process.exit(22);
+                });
+              });
+            });
           });
         });
       });
     });
-  } catch (error) {
-    console.log(`Error in tweet function: ${JSON.stringify(error)}`);
+  } catch (err) {
+    console.error(`Error in tweetFunction: ${(JSON.stringify(err), JSON.parse(err))}`);
+    process.exit(1);
   }
 };
 
@@ -154,6 +166,6 @@ export const followFollowers = async () => {
       await dailygoldquotes.post('friendships/create', { user_id: idToFollow });
     }
   } catch (err) {
-    console.error(`Error following followers of @dailygoldquotes: ${JSON.stringify(err)}`);
+    throw `Error in followFollowers: ${err}`;
   }
 };
