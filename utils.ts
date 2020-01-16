@@ -2,170 +2,80 @@ import Twitter from 'twitter';
 import cheerio from 'cheerio';
 import puppeteer from 'puppeteer';
 import fs from 'fs';
-const request = require('request').defaults({ encoding: null });
+import util from 'util';
+import dotenv from 'dotenv';
+import requestPromise from 'request-promise';
+import uniqueString from 'unique-string';
 
-require('dotenv').config();
+dotenv.config();
 
+// eslint-disable-next-line no-process-env
 const { goldConsumerKey, goldConsumerSecret, goldAccessTokenKey, goldAccessTokenSecret } = process.env;
-
+const errorMsg = 'Some environment variable is undefined';
+if (!goldConsumerKey) {
+  throw new Error(errorMsg);
+}
+if (!goldConsumerSecret) {
+  throw new Error(errorMsg);
+}
+if (!goldAccessTokenKey) {
+  throw new Error(errorMsg);
+}
+if (!goldAccessTokenSecret) {
+  throw new Error(errorMsg);
+}
 const twitConfig = {
   consumer_key: goldConsumerKey,
   consumer_secret: goldConsumerSecret,
   access_token_key: goldAccessTokenKey,
   access_token_secret: goldAccessTokenSecret,
 };
-
-const dailygoldquotes = new Twitter(twitConfig as any);
-
-const todaysDate = (() => {
-  let result;
-  const dateObj = new Date();
-  if (dateObj.getMonth() < 10) {
-    result = `0${Number(dateObj.getMonth() + 1)}`;
-  } else {
-    result = (Number(dateObj.getMonth()) + 1).toString();
-  }
-  if (dateObj.getDate() < 10) {
-    const todaysDate = Number(dateObj.getDate());
-    dateObj.setDate(todaysDate);
-    result += `0${dateObj.getDate()}`;
-  } else {
-    const todaysDate = Number(dateObj.getDate());
-    dateObj.setDate(todaysDate);
-    result += dateObj.getDate();
-  }
-  result += dateObj.getFullYear();
-
-  return result;
-})();
-
-const todaysDateString = (() => {
-  const dateObj = new Date();
-  let result;
-  if (dateObj.getMonth() < 10) {
-    result = `0${Number(dateObj.getMonth() + 1)}/`;
-  } else {
-    result = `${Number(dateObj.getMonth()) + 1}/`;
-  }
-  if (dateObj.getDate() < 10) {
-    const todaysDate = Number(dateObj.getDate());
-    dateObj.setDate(todaysDate);
-    result += `0${dateObj.getDate()}/`;
-  } else {
-    const todaysDate = Number(dateObj.getDate());
-    dateObj.setDate(todaysDate);
-    result += `${dateObj.getDate()}/`;
-  }
-  result += dateObj.getFullYear();
-
-  return result;
-})();
-
-//NYSE opens at 9:30am eastern, 6:30am pacific
-//Most popular time to Tweet worldwide & US: noon eastern time, 8am-9am pacific time
-
-//URL for puppeteer to find gold charts
 const url = 'https://goldprice.org/';
+const dailygoldquotes = new Twitter(twitConfig);
+const todaysDateString = new Date().toLocaleString('en-US', { year: '2-digit', month: '2-digit', day: '2-digit' });
+const readFile = util.promisify(fs.readFile);
+const unlink = util.promisify(fs.unlink);
+const writeFile = util.promisify(fs.writeFile);
 
-type ChartType = '20_year' | '60_day' | '6_month';
-
-export const tweetFunction = async (chartValue: ChartType): Promise<void> => {
-  try {
-    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
-    const page = await browser.newPage();
-    const fourMinInMS = 4 * 60 * 100;
-    await page.goto(url, { timeout: fourMinInMS });
-    await page.select('select#gpxSmallChartTopLeft_time', chartValue);
-    await page.select('select#gpxSmallChartTopRight_time', chartValue);
-    const html = await page.content();
-    const $ = cheerio.load(html);
-    await browser.close();
-    //Get attribute src text for chart
-    const goldPrice = $('#gpxtickerLeft_price').text();
-    const goldChartSrc = $('#gpxSmallChartTopLeft_img').attr('src');
-    const silverPrice = $('#gpxtickerMiddle_price').text();
-    const silverChartSrc = $('#gpxSmallChartTopRight_img').attr('src');
-    //Download the photos from goldprice.org then write to local directory
-    request.get(goldChartSrc, (_err: any, _res: any, body: any) => {
-      fs.writeFile(`${todaysDate}goldchart.png`, body, (err) => {
-        if (err) {
-          throw err;
-        }
-        console.log('The file was saved');
-        const goldChartBuffer = fs.readFileSync(`./${todaysDate}goldchart.png`);
-        //Upload chart png file
-        dailygoldquotes.post('media/upload', { media: goldChartBuffer }, (err, media, _res) => {
-          if (err) {
-            throw err;
-          }
-          const status = {
-            status: `Gold price on ${todaysDateString}: $${goldPrice} USD #gold`,
-            media_ids: media.media_id_string,
-          };
-          dailygoldquotes.post('statuses/update', status, (err, _tweet, _res) => {
-            if (err) {
-              throw err;
-            }
-            console.log('Gold Success!');
-          });
-        });
-      });
-      request.get(silverChartSrc, (_err: any, _res: any, body: any) => {
-        fs.writeFile(`${todaysDate}silverchart.png`, body, (err) => {
-          if (err) {
-            throw err;
-          }
-          console.log('The file was saved');
-          const goldChartBuffer = fs.readFileSync(`./${todaysDate}silverchart.png`);
-          //Upload chart png file
-          dailygoldquotes.post('media/upload', { media: goldChartBuffer }, (err, media, _res) => {
-            if (err) {
-              throw err;
-            }
-            const status = {
-              status: `Silver price on ${todaysDateString}: $${silverPrice} USD #silver`,
-              media_ids: media.media_id_string,
-            };
-            dailygoldquotes.post('statuses/update', status, (err, _tweet, _res) => {
-              if (err) {
-                throw err;
-              }
-              console.log('Silver Success!');
-              fs.unlink(`./${todaysDate}goldchart.png`, (err) => {
-                if (err) {
-                  throw err;
-                }
-                console.log('Deleted silver chart');
-                fs.unlink(`./${todaysDate}silverchart.png`, (err) => {
-                  if (err) {
-                    throw err;
-                  }
-                  console.log('Deleted gold chart');
-                  process.exit(22);
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-  } catch (err) {
-    console.error(`Error in tweetFunction: ${(JSON.stringify(err), JSON.parse(err))}`);
-    process.exit(1);
-  }
+const tweetChart = async (chartSrc: string, price: string, type: 'gold' | 'silver'): Promise<void> => {
+  const chartFile = await requestPromise.get(chartSrc, { encoding: null });
+  const chartFileName = `${uniqueString()}-${type}Chart.png`;
+  await writeFile(chartFileName, chartFile);
+  const media = await readFile(chartFileName);
+  const chartMedia = await dailygoldquotes.post('media/upload', { media });
+  await dailygoldquotes.post('statuses/update', {
+    status: `Gold price on ${todaysDateString}: $${price} USD #${type}`,
+    media_ids: chartMedia.media_id_string,
+  });
+  await unlink(chartFileName);
 };
 
-//Function to check current followers then follow all that are returned. Gotta encourage more!
+export const tweetFunction = async (chartValue: '20_year' | '60_day' | '6_month'): Promise<void> => {
+  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+  const page = await browser.newPage();
+  const fourMinInMS = 4 * 60 * 100;
+  await page.goto(url, { timeout: fourMinInMS });
+  await Promise.all([
+    page.select('select#gpxSmallChartTopLeft_time', chartValue),
+    page.select('select#gpxSmallChartTopRight_time', chartValue),
+  ]);
+  const html = await page.content();
+  const $ = cheerio.load(html);
+  await browser.close();
+  const goldPrice = $('#gpxtickerLeft_price').text();
+  const goldChartSrc = $('#gpxSmallChartTopLeft_img').attr('src');
+  const silverPrice = $('#gpxtickerMiddle_price').text();
+  const silverChartSrc = $('#gpxSmallChartTopRight_img').attr('src');
+  await Promise.all([tweetChart(goldChartSrc, goldPrice, 'gold'), tweetChart(silverChartSrc, silverPrice, 'silver')]);
+};
+
 export const followFollowers = async () => {
-  try {
-    const tweet = await dailygoldquotes.get('followers/list', {
-      screen_name: 'dailygoldquotes',
-    });
-    for (const index in tweet.users) {
-      const idToFollow = tweet.users[index].id_str;
-      await dailygoldquotes.post('friendships/create', { user_id: idToFollow });
-    }
-  } catch (err) {
-    throw `Error in followFollowers: ${err}`;
-  }
+  const { users } = await dailygoldquotes.get('followers/list', {
+    screen_name: 'dailygoldquotes',
+  });
+  await Promise.all(
+    users.map(async (user: { id_str: string }) => {
+      await dailygoldquotes.post('friendships/create', { user_id: user.id_str });
+    }),
+  );
 };

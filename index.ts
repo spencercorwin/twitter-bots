@@ -1,26 +1,45 @@
+/* eslint-disable no-process-exit */
+/* eslint-disable no-console */
 import { tweetFunction, followFollowers } from './utils';
 
-const todaysDate = new Date();
+const todaysDate = new Date().getDate();
+const dayOfTheWeek = new Date().getDay();
+const dateString = new Date().toString();
 
-//Every month: 20 yr, 30 yr, all
-//Potential options: 20_year 30_year all_data
-if (todaysDate.getDate() === 1) {
-  tweetFunction('20_year');
-  console.log(`Tweeting at ${todaysDate.toString()}`);
+//NYSE opens at 9:30am eastern, 6:30am pacific
+//Most popular time to Tweet worldwide & US: noon eastern time, 8am-9am pacific time
+if (todaysDate === 1) {
+  console.log(`Tweeting 20_year chart at ${dateString}`);
+  tweetFunction('20_year')
+    .then(() => {
+      process.exit(0);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
 } else {
-  //Check if the day is Mon-Fri
-  //Script for daily Tweets. Every Mon-Thurs at 9am
-  //Potential options: 60_day
-  if ([0, 1, 2, 3, 4, 5].includes(todaysDate.getDay())) {
-    tweetFunction('60_day');
-    console.log(`Tweeting at ${todaysDate.toString()}`);
+  if ([0, 1, 2, 3, 4, 5].includes(dayOfTheWeek)) {
+    console.log(`Tweeting 60_day chart at ${dateString}`);
+    tweetFunction('60_day')
+      .then(() => {
+        process.exit(0);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   }
-
-  //Every week on Sat: 6 months, 1 yr, 2 yr
-  //Potential options: 6_month 1_year 2_year
-  if (todaysDate.getDay() === 6) {
-    followFollowers();
-    setTimeout(() => tweetFunction('6_month'), 5000);
-    console.log(`Tweeting at ${todaysDate.toString()}`);
+  if (dayOfTheWeek === 6) {
+    console.log(`Tweeting 6_month chart at ${dateString}`);
+    followFollowers()
+      .then(() => {
+        console.log('Followed followers. Moving to tweetFunction');
+        tweetFunction('6_month');
+      })
+      .then(() => {
+        process.exit(0);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   }
 }
