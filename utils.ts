@@ -44,7 +44,7 @@ const tweetChart = async (chartSrc: string, price: string, type: 'gold' | 'silve
   const media = await readFile(chartFileName);
   const chartMedia = await dailygoldquotes.post('media/upload', { media });
   await dailygoldquotes.post('statuses/update', {
-    status: `Gold price on ${todaysDateString}: $${price} USD #${type}`,
+    status: `${type === 'gold' ? 'Gold' : 'Silver'} price on ${todaysDateString}: $${price} USD #${type}`,
     media_ids: chartMedia.media_id_string,
   });
   await unlink(chartFileName);
